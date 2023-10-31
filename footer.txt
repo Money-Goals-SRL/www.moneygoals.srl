@@ -1,0 +1,1 @@
+footerText='<footer>Copyright © 2022-2023 - <strong>Money Goals SRL sole proprietorship</strong> - VAT Number: IT04001560368 - Sh. Capital: 10.000€ - All Rights Reserved</footer>';document.write(footerText)
