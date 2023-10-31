@@ -1,4 +1,7 @@
+// Class Transaction contains method and attributes for every transaction that you want to insert.
+
 class Transaction {
+  // put 1.0 forex rate if commission are calculated in stock base currency
   constructor(
     date,
     price,
@@ -23,6 +26,14 @@ class Transaction {
     return this.price * this.quantity;
   }
 
+  calcCurrencyCost() {
+    if (this.type == "Buy") {
+      return this.price * this.quantity + this.commission * this.forexRate;
+    } else if (this.type == "Sell") {
+      return -this.price * this.quantity + this.commission * this.forexRate;
+    }
+    return 0;
+  }
   calcEurCost() {
     return this.price * this.forexRate * this.quantity;
   }
@@ -44,71 +55,31 @@ class Transaction {
 class Position {
   constructor(ticker, currency, transList) {
     this.ticker = ticker;
-    this.shares = this.getTotalShares(transList);
-    this.avgBuyPrice = this.getAvgBuyPrice(transList);
+    this.shares = this.calcTotalShares(transList);
+    this.avgBuyPrice = this.calcAvgBuyPrice(transList);
     this.currency = currency;
-    this.marketPrice = 0.0;
-    this.currentReturn = this.getCurrentReturn();
-    this.currentYield = 0.0;
-    this.totalEurCost = this.getTotalEurCost(transList);
-    this.totalCurrencyCost = this.getTotalCost(transList);
+    this.totalPurchaseCost = this.calcTotalPurchaseCost(transList);
+    this.totalSellingRevenue = this.calcTotalSellingRevenue(transList);
+    this.totalCommissions = this.calcTotalCommission(transList);
   }
 
-  // Setters
-  async setYield() {
-    this.currentYield = await this.getCurrentYield();
-  }
-  async setMarketPrice() {
-    this.marketPrice = await this.getMarketPrice();
-  }
-
-  // Getters
-  getValue() {
-    return this.shares * this.avgBuyPrice;
-  }
-
-  getCurrentReturn() {
-    return this.shares * (this.marketPrice - this.avgBuyPrice);
-  }
-
-  async getCurrentYield() {
-    return ((this.marketPrice - this.avgBuyPrice) / this.avgBuyPrice) * 100;
-  }
-
-  async getMarketPrice() {
-    let result;
-    try {
-      result = await yahooFinance.quote(this.ticker);
-    } catch (error) {
-      if (
-        error instanceof yahooFinance.errors.FailedYahooValidationError ||
-        error instanceof yahooFinance.errors.HTTPError
-      ) {
-        console.log("Vedi il sito github di yahoo-finance2.");
-        return;
-      } else {
-        console.warn("Errore indefinito");
-        return;
-      }
-    }
-    return parseFloat(result.regularMarketPrice).toFixed(2);
-  }
-
-  getAvgBuyPrice(transList) {
+  calcAvgBuyPrice(transList) {
     let totalCost = 0;
     let totalShares = 0;
-    let avgBuyPrice = 0;
     transList.forEach((t, i) => {
       if (t.ticker == this.ticker && t.type == "Buy") {
         totalCost = totalCost + t.calcAmount();
         totalShares = totalShares + t.quantity;
       }
     });
-    avgBuyPrice = totalCost / totalShares;
-    return avgBuyPrice;
+    if (totalShares) {
+      return totalCost / totalShares;
+    } else {
+      return 0;
+    }
   }
 
-  getTotalShares(transList) {
+  calcTotalShares(transList) {
     let totalShares = 0;
     transList.forEach((t, i) => {
       if (t.ticker == this.ticker) {
@@ -122,21 +93,43 @@ class Position {
     return totalShares;
   }
 
-  getTotalEurCost(transList) {
-    let totalEuros = 0;
-    transList.forEach((t, i) => {
-      if (t.ticker == this.ticker) {
-        totalEuros = totalEuros + t.calcTotEurCost();
+  calcTotalPurchaseCost(transList) {
+    let total = 0;
+    transList.forEach((t) => {
+      if (t.ticker == this.ticker && t.type == "Buy") {
+        total += t.calcAmount();
       }
     });
-    return totalEuros;
+    return total;
   }
 
-  getTotalCost(transList) {
+  calcTotalSellingRevenue(transList) {
+    let total = 0;
+    transList.forEach((t) => {
+      if (t.ticker == this.ticker && t.type == "Sell") {
+        total += t.calcAmount();
+      }
+    });
+    return total;
+  }
+
+  calcTotalCommission(transList) {
+    let total = 0;
+    transList.forEach((t) => {
+      if (t.ticker == this.ticker) {
+        total += t.commission;
+      }
+    });
+    return total;
+  }
+
+  // Calculates the current cost of the position, adding all purchase prices, adding commissions paid and removing sold value.
+  // Returns a net current cost for the position.
+  calcCurrentCostInCurrency(transList) {
     let totalCost = 0;
     transList.forEach((t) => {
       if (t.ticker == this.ticker) {
-        totalCost = totalCost + t.calcAmount();
+        totalCost = totalCost + t.calcCurrencyCost();
       }
     });
     return totalCost;
@@ -148,16 +141,28 @@ function onlyUnique(value, index, self) {
   return self.indexOf(value) === index;
 }
 
+function filterUniqueFirstElements(arr) {
+  const uniqueFirstElements = new Set();
+  return arr.filter((subarray) => {
+    const firstElement = subarray[0];
+    if (!uniqueFirstElements.has(firstElement)) {
+      uniqueFirstElements.add(firstElement);
+      return true;
+    }
+    return false;
+  });
+}
+
 // La funzione ritorna il portafoglio titoli a partire da un array di transazioni
 function createPortfolio(transactionList) {
-  let tkrs = [String];
+  let tkrs = [[String, String]];
   let pf = [Position];
   transactionList.forEach((t, i) => {
-    tkrs[i] = t.ticker;
+    tkrs[i] = [t.ticker, t.currency];
   });
-  tkrs = tkrs.filter(onlyUnique);
-  tkrs.forEach(function (trk, i) {
-    pf[i] = new Position(trk, "$", transactionList);
+  tkrs = filterUniqueFirstElements(tkrs);
+  tkrs.forEach(function (tkr, i) {
+    pf[i] = new Position(tkr[0], tkr[1], transactionList);
   });
   return pf;
 }
@@ -170,7 +175,6 @@ function calculateTotals(pf) {
   pf.forEach((p, i) => {
     fx[i] = p.currency;
   });
-  fx = fx.filter(onlyUnique);
   fx.forEach((f, i) => {
     pf.forEach((p, j) => {
       if (f == p.currency) {
@@ -191,10 +195,10 @@ let transactions = [
   new Transaction("2022-09-16", 98.529, "$", 20, "GOOGL", "Buy", 0.9617, 9.36),
   new Transaction("2022-06-27", 115.25, "$", 60, "GOOGL", "Buy", 1.0568, 8.51),
   new Transaction("2022-06-28", 170.0, "$", 20, "META", "Buy", 1.0521, 8.55),
-  new Transaction("2023-02-03", 193.35, "$", 25, "META", "Sell", 1.0913, 8.25),
-  new Transaction("2023-10-20", 24.97, "£", 180, "BATS", "Buy", 0.8726, 25.47),
-  new Transaction("2023-04-27", 28.0, "$", 50, "LZB", "Buy", 1.1042, 1.0),
-  new Transaction("2023-04-04", 7.5, "$", 200, "MBC", "Buy", 1.0901, 1.0),
+  new Transaction("2023-02-03", 193.35, "$", 25, "META", "Sell", 1, 8.25),
+  new Transaction("2023-10-20", 24.97, "£", 180, "BATS", "Buy", 1, 25.47),
+  new Transaction("2023-04-27", 28.0, "$", 50, "LZB", "Buy", 1, 1.0),
+  new Transaction("2023-04-04", 7.5, "$", 200, "MBC", "Buy", 1, 1.0),
 ];
 
 transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -211,6 +215,7 @@ let transactionHTMLText = `
 <th className="holding-data">Quantity</th>
 <th className="holding-data">Avg. Price</th>
 <th className="holding-data">Operation</th>
+<th className="holding-data">Commission</th>
 </tr>
 `;
 
@@ -235,6 +240,12 @@ transactions.forEach((tr) => {
     <td className="holding-data">` +
     tr.type +
     `</td>
+    <td className="holding-data">` +
+    (tr.commission * tr.forexRate).toFixed(2) +
+    ` ` +
+    tr.currency +
+    `
+    </td>
   </tr>`;
 });
 
@@ -242,30 +253,38 @@ let portfolioHTMLText = `
     <tr>
         <th>Ticker</th>
         <th class="ticker-data">Shares Quantity</th>
-        <th class="price-data">Avg. Buy Price</th>
-        <th class="price-data">Total Eur Cost*</th>
+        <th class="price-data">Cost Base *</th>
+        <th class="price-data">Realized Revenues *</th>
+        <th class="price-data">Total Commissions</th>
     </tr>
 `;
 
 portfolio.forEach((pos) => {
   portfolioHTMLText +=
     `
-        <tr>
-        <td class="ticker-data">` +
+    <tr>
+    <td class="ticker-data">` +
     pos.ticker +
     `</td>
         <td>` +
     pos.shares +
-    `</td>
-        <td class="price-data">` +
-    pos.avgBuyPrice.toFixed(2) +
+    `</td>   
+    <td>` +
+    pos.totalPurchaseCost.toFixed(2) +
     ` ` +
     pos.currency +
     `</td>
-        <td>` +
-    pos.totalEurCost.toFixed(2) +
-    ` €</td>
-        </tr>
+    <td>` +
+    pos.totalSellingRevenue.toFixed(2) +
+    ` ` +
+    pos.currency +
+    `</td>
+    <td>` +
+    pos.totalCommissions.toFixed(2) +
+    ` ` +
+    pos.currency +
+    `</td>
+    </tr>
     `;
 });
 
