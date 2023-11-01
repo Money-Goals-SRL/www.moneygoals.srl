@@ -199,7 +199,7 @@ let transactions = [
   new Transaction("2023-10-20", 24.97, "£", 180, "BATS", "Buy", 1, 25.47),
   new Transaction("2023-04-27", 28.0, "$", 50, "LZB", "Buy", 1, 1.0),
   new Transaction("2023-04-04", 7.5, "$", 200, "MBC", "Buy", 1, 1.0),
-  
+  new Transaction("2023-10-13", 95, "$", 26, "ATVI", "Sell", 1, 0),
 ];
 
 transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
