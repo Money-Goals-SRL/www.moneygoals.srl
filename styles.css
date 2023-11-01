@@ -70,8 +70,8 @@ hr {
   width: 100%;
 }
 .column {
-  /* display: left;
-  flex: 100%; */
+  display: left;
+  flex: 100%;
   text-align: center;
   justify-content: center;
 }
