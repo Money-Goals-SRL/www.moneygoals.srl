@@ -18,7 +18,7 @@
 
       <div style="width: 90%; margin: auto">
         <div>
-          <div style="text-align: center"><h2>Current holdings</h2></div>
+          <div><h2 style="text-align: center">Current Holdings</h2></div>
           <div
             style="
               display: flex;
@@ -32,10 +32,26 @@
             <br />
           </div>
         </div>
+        <div>
+          <div style="text-align: left; width: 90%; margin: auto">
+            <p>
+              <br />
+              * Does not include commissions and corporate income tax or loss tax reliefs.
+              <br />
+              ** Does not include corporate income tax, but includes withholding taxes and commissions.
+              <br />
+              Tax effects on realized gains or losses and dividends are not
+              included, except withholdings taxes on dividends.
+            </p>
+          </div>
+          <br />
+          <div style="text-align: center">
+            <p>Data updated on 01/Nov/2023</p>
+          </div>
+        </div>
         <hr />
         <div>
-          <div style="text-align: center"><h2>Operations History</h2></div>
-          <div style="text-align: center; margin: 1em"></div>
+          <div><h2 style="text-align: center">Operations History</h2></div>
           <div
             style="
               display: flex;
@@ -46,20 +62,22 @@
             <table class="holdings-table" style="margin: auto">
               <tbody id="transaction-results"></tbody>
             </table>
-          </div>
-          <br />
-          <div style="text-align: left; width: 90%; margin: auto">
-            <p>
-              <br />
-              * Does not include commissions.
-              <br />
-              Tax effects on realized gains or losses and dividends are not
-              included.
-            </p>
-          </div>
-          <br />
-          <div style="text-align: center">
-            <p>Data updated on 30/Oct/2023</p>
+          </div>          
+        </div>
+        <hr />
+        <div>
+          <div><h2 style="text-align: center">Dividends History</h2></div>
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              overflow-x: auto;
+            "
+          >
+            <table class="holdings-table" style="margin: auto">
+              <tbody id="dividend-results"></tbody>
+            </table>
+            <br />
           </div>
         </div>
       </div>

@@ -48,12 +48,35 @@ class Transaction {
   }
 }
 
+class Dividend {
+  // put 1.0 forex rate if commission are calculated in stock base currency
+  constructor(
+    date,
+    dps,
+    currency,
+    quantity,
+    ticker,
+    withholdingTaxRate,
+    commission
+  ) {
+    this.date = new Date(date).toISOString().split("T")[0];
+    this.dps = dps;
+    this.currency = currency;
+    this.quantity = quantity;
+    this.ticker = ticker;
+    this.tax = withholdingTaxRate * dps * quantity;
+    this.commission = commission;
+    this.grossAmount = dps * quantity;
+    this.netAmount = dps * quantity * (1 - withholdingTaxRate) - commission
+  }
+}
+
 // La classe Position rappresenta una posizione finanziaria all'interno del portafoglio
 // complessivo, ed è costruita a partire da un ticker, una valuta base e una lista di
 // transazioni
 
 class Position {
-  constructor(ticker, currency, transList) {
+  constructor(ticker, currency, transList, divList) {
     this.ticker = ticker;
     this.shares = this.calcTotalShares(transList);
     this.avgBuyPrice = this.calcAvgBuyPrice(transList);
@@ -61,6 +84,7 @@ class Position {
     this.totalPurchaseCost = this.calcTotalPurchaseCost(transList);
     this.totalSellingRevenue = this.calcTotalSellingRevenue(transList);
     this.totalCommissions = this.calcTotalCommission(transList);
+    this.totalNetDividends = this.calcNetDividends(divList);
   }
 
   calcAvgBuyPrice(transList) {
@@ -123,17 +147,16 @@ class Position {
     return total;
   }
 
-  // Calculates the current cost of the position, adding all purchase prices, adding commissions paid and removing sold value.
-  // Returns a net current cost for the position.
-  calcCurrentCostInCurrency(transList) {
-    let totalCost = 0;
-    transList.forEach((t) => {
-      if (t.ticker == this.ticker) {
-        totalCost = totalCost + t.calcCurrencyCost();
+  calcNetDividends(divList) {
+    let total = 0;
+    divList.forEach((d) => {
+      if (d.ticker == this.ticker) {
+        total += d.netAmount;
       }
     });
-    return totalCost;
+    return total;
   }
+
 }
 
 // La funzione ritorna un array che contiene tutti i diversi elementi dell'array in input, senza ripetizioni
@@ -154,7 +177,7 @@ function filterUniqueFirstElements(arr) {
 }
 
 // La funzione ritorna il portafoglio titoli a partire da un array di transazioni
-function createPortfolio(transactionList) {
+function createPortfolio(transactionList, dividendList) {
   let tkrs = [[String, String]];
   let pf = [Position];
   transactionList.forEach((t, i) => {
@@ -162,29 +185,17 @@ function createPortfolio(transactionList) {
   });
   tkrs = filterUniqueFirstElements(tkrs);
   tkrs.forEach(function (tkr, i) {
-    pf[i] = new Position(tkr[0], tkr[1], transactionList);
+    pf[i] = new Position(tkr[0], tkr[1], transactionList, dividendList);
   });
   return pf;
 }
 
-function calculateTotals(pf) {
-  let fx = [];
-  let usdAm = 0.0;
-  let eurAm = 0.0;
+let dividends = [
+  new Dividend("2023-09-15", 0.1815, "$", 50, "LZB", 0.30, 0),
+  new Dividend("2023-06-15", 0.1815, "$", 50, "LZB", 0.30, 0),
+  new Dividend("2023-08-17", 0.99, "$", 26, "ATVI", 0.30, 0),
 
-  pf.forEach((p, i) => {
-    fx[i] = p.currency;
-  });
-  fx.forEach((f, i) => {
-    pf.forEach((p, j) => {
-      if (f == p.currency) {
-        usdAm = usdAm + p.totalCurrencyCost;
-        eurAm = eurAm + p.totalEurCost;
-      }
-    });
-  });
-  return { $: usdAm.toFixed(2), "€": eurAm.toFixed(2) };
-}
+]
 
 let transactions = [
   new Transaction("2022-11-22", 75.5481, "$", 26, "ATVI", "Buy", 0.9708, 8.74),
@@ -202,12 +213,12 @@ let transactions = [
   new Transaction("2023-10-13", 95, "$", 26, "ATVI", "Sell", 1, 0),
 ];
 
+dividends.sort((a, b) => new Date(b.date) - new Date(a.date));
 transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-let portfolio = createPortfolio(transactions);
+let portfolio = createPortfolio(transactions, dividends);
 portfolio.sort((a, b) => a.ticker.localeCompare(b.ticker));
 
-let totalPortfolioValue = calculateTotals(portfolio);
 
 let transactionHTMLText = `
 <tr>
@@ -250,6 +261,50 @@ transactions.forEach((tr) => {
   </tr>`;
 });
 
+let dividendHTMLText = `
+<tr>
+<th className="holding-data">Date</th>
+<th className="holding-data">Ticker</th>
+<th className="holding-data">Quantity</th>
+<th className="holding-data">Dividend per Share</th>
+<th className="holding-data">Withholding Tax</th>
+<th className="holding-data"> Net Amount</th>
+</tr>
+`;
+
+dividends.forEach((div) => {
+  dividendHTMLText +=
+    `<tr>
+    <td className="holding-data">` +
+    div.date +
+    `</td>
+    <td className="holding-data">` +
+    div.ticker +
+    `</td>
+    <td className="holding-data">` +
+    div.quantity +
+    `</td>
+    <td className="holding-data">` +
+    div.dps.toFixed(4) +
+    ` ` +
+    div.currency +
+    `
+    </td>    
+    <td className="holding-data">` +
+    div.tax.toFixed(2) +
+    ` ` +
+    div.currency +
+    `
+    </td>    
+    <td className="holding-data">` +
+    div.netAmount.toFixed(2) +
+    ` ` +
+    div.currency +
+    `
+    </td>
+    </tr>`;
+});
+
 let portfolioHTMLText = `
     <tr>
         <th>Ticker</th>
@@ -257,6 +312,7 @@ let portfolioHTMLText = `
         <th class="price-data">Cost Base *</th>
         <th class="price-data">Realized Revenues *</th>
         <th class="price-data">Total Commissions</th>
+        <th class="price-data">Net Dividends **</th>
     </tr>
 `;
 
@@ -284,10 +340,17 @@ portfolio.forEach((pos) => {
     pos.totalCommissions.toFixed(2) +
     ` ` +
     pos.currency +
+    `</td>    
+    <td>` +
+    pos.totalNetDividends.toFixed(2) +
+    ` ` +
+    pos.currency +
     `</td>
     </tr>
     `;
+    console.log(pos.totalNetDividends)
 });
+
 
 let transactionTable = document.getElementById("transaction-results");
 if (transactionTable) {
@@ -297,4 +360,9 @@ if (transactionTable) {
 let portfolioTable = document.getElementById("portfolio-results");
 if (portfolioTable) {
   portfolioTable.innerHTML += portfolioHTMLText;
+}
+
+let dividendTable = document.getElementById("dividend-results");
+if (dividendTable) {
+  dividendTable.innerHTML += dividendHTMLText;
 }
