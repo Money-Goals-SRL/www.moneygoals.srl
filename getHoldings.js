@@ -261,6 +261,7 @@ transactions.forEach((tr) => {
   </tr>`;
 });
 
+
 let dividendHTMLText = `
 <tr>
 <th className="holding-data">Date</th>
@@ -350,7 +351,6 @@ portfolio.forEach((pos) => {
     `;
     console.log(pos.totalNetDividends)
 });
-
 
 let transactionTable = document.getElementById("transaction-results");
 if (transactionTable) {

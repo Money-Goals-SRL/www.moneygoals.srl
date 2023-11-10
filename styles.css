@@ -104,7 +104,7 @@ hr {
 
 th {
   text-align: left;
-  min-width: 200px;
+  min-width: 160px;
   overflow-x: auto;
 }
 
@@ -186,7 +186,7 @@ th {
 .holdings-table {
   border: 1px solid #000000;
   margin: auto;
-  width: 80%;
+  width: 90%;
 }
 .holdings-table tr td,
 .holdings-table tr th {
