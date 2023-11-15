@@ -67,7 +67,7 @@ class Dividend {
     this.tax = withholdingTaxRate * dps * quantity;
     this.commission = commission;
     this.grossAmount = dps * quantity;
-    this.netAmount = dps * quantity * (1 - withholdingTaxRate) - commission
+    this.netAmount = dps * quantity * (1 - withholdingTaxRate) - commission;
   }
 }
 
@@ -156,7 +156,6 @@ class Position {
     });
     return total;
   }
-
 }
 
 // La funzione ritorna un array che contiene tutti i diversi elementi dell'array in input, senza ripetizioni
@@ -191,11 +190,10 @@ function createPortfolio(transactionList, dividendList) {
 }
 
 let dividends = [
-  new Dividend("2023-09-15", 0.1815, "$", 50, "LZB", 0.30, 0),
-  new Dividend("2023-06-15", 0.1815, "$", 50, "LZB", 0.30, 0),
-  new Dividend("2023-08-17", 0.99, "$", 26, "ATVI", 0.30, 0),
-
-]
+  new Dividend("2023-09-15", 0.1815, "$", 50, "LZB", 0.3, 0),
+  new Dividend("2023-06-15", 0.1815, "$", 50, "LZB", 0.3, 0),
+  new Dividend("2023-08-17", 0.99, "$", 26, "ATVI", 0.3, 0),
+];
 
 let transactions = [
   new Transaction("2022-11-22", 75.5481, "$", 26, "ATVI", "Buy", 0.9708, 8.74),
@@ -211,6 +209,46 @@ let transactions = [
   new Transaction("2023-04-27", 28.0, "$", 50, "LZB", "Buy", 1, 1.0),
   new Transaction("2023-04-04", 7.5, "$", 200, "MBC", "Buy", 1, 1.0),
   new Transaction("2023-10-13", 95, "$", 26, "ATVI", "Sell", 1, 0),
+  new Transaction(
+    "2023-05-08",
+    384,
+    "$",
+    1,
+    "GOOGL18AUG23115C",
+    "Sell",
+    1,
+    1.05
+  ),
+  new Transaction(
+    "2023-08-18",
+    1208,
+    "$",
+    1,
+    "GOOGL18AUG23115C",
+    "Buy",
+    1,
+    1.05
+  ),
+  new Transaction(
+    "2023-05-08",
+    963,
+    "$",
+    1,
+    "META18AUG23260C",
+    "Sell",
+    1,
+    1.06
+  ),
+  new Transaction(
+    "2023-08-18",
+    1828,
+    "$",
+    1,
+    "META18AUG23260C",
+    "Buy",
+    1,
+    1.05
+  ),
 ];
 
 dividends.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -218,7 +256,6 @@ transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
 let portfolio = createPortfolio(transactions, dividends);
 portfolio.sort((a, b) => a.ticker.localeCompare(b.ticker));
-
 
 let transactionHTMLText = `
 <tr>
@@ -260,7 +297,6 @@ transactions.forEach((tr) => {
     </td>
   </tr>`;
 });
-
 
 let dividendHTMLText = `
 <tr>
@@ -349,7 +385,7 @@ portfolio.forEach((pos) => {
     `</td>
     </tr>
     `;
-    console.log(pos.totalNetDividends)
+  console.log(pos.totalNetDividends);
 });
 
 let transactionTable = document.getElementById("transaction-results");
