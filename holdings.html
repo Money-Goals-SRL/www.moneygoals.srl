@@ -1,93 +1,100 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Money Goals SRL</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="global-div">
-      <div class="money-goals-header">
-        <h1 style="text-align: center">
-          <a href="index.html" class="header-home">Money Goals SRL</a>
-        </h1>
-      </div>
-      <hr />
 
-      <div style="width: 90%; margin: auto">
-        <div>
-          <div><h2 style="text-align: center">Current Holdings</h2></div>
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              overflow-x: auto;
-            "
-          >
-            <table class="holdings-table" style="margin: auto">
-              <tbody id="portfolio-results"></tbody>
-            </table>
-            <br />
-          </div>
-        </div>
-        <div>
-          <div style="text-align: left; width: 90%; margin: auto">
-            <p>
-              <br />
-              * Does not include commissions and corporate income tax or loss
-              tax reliefs.
-              <br />
-              ** Does not include corporate income tax, but includes withholding
-              taxes and commissions.
-              <br />
-              Tax effects on realized gains or losses and dividends are not
-              included, except withholdings taxes on dividends.
-            </p>
-          </div>
-          <br />
-          <div style="text-align: center">
-            <p>Data updated on 15/Nov/2023</p>
-          </div>
-        </div>
-        <hr />
-        <div>
-          <div><h2 style="text-align: center">Operations History</h2></div>
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              overflow-x: auto;
-            "
-          >
-            <table class="holdings-table" style="margin: auto">
-              <tbody id="transaction-results"></tbody>
-            </table>
-          </div>
-        </div>
-        <hr />
-        <div>
-          <div><h2 style="text-align: center">Dividends History</h2></div>
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              overflow-x: auto;
-            "
-          >
-            <table class="holdings-table" style="margin: auto">
-              <tbody id="dividend-results"></tbody>
-            </table>
-            <br />
-          </div>
-        </div>
-      </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Money Goals SRL</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
 
-      <hr />
+<body>
+  <div class="global-div">
+    <div class="money-goals-header">
+      <h1 style="text-align: center">
+        <a href="index.html" class="header-home">Money Goals SRL</a>
+      </h1>
     </div>
-    <footer></footer>
-    <script src="getFooter.js"></script>
-    <script src="getHoldings.js"></script>
-  </body>
+    <hr />
+
+    <div style="width: 90%; margin: auto">
+      <div>
+        <div>
+          <h2 style="text-align: center">Current Holdings</h2>
+        </div>
+        <div style="
+              display: flex;
+              justify-content: space-between;
+              overflow-x: auto;
+            ">
+          <table class="holdings-table" style="margin: auto">
+            <tbody id="portfolio-results"></tbody>
+          </table>
+          <br />
+        </div>
+      </div>
+      <div>
+        <div style="text-align: left; width: 90%; margin: auto">
+          <p>
+            <br />
+            * Does not include commissions and corporate income tax or loss
+            tax reliefs.
+            <br />
+            ** Does not include corporate income tax, but includes withholding
+            taxes and commissions.
+            <br />
+            Tax effects on realized gains or losses and dividends are not
+            included, except withholdings taxes on dividends.
+          </p>
+        </div>
+        <br />
+        <div style="text-align: center">
+          <p>Holdings data updated on 15/Nov/2023</p>
+        </div>
+      </div>
+      <hr />
+      <div>
+        <div>
+          <h2 style="text-align: center">Operations History</h2>
+        </div>
+        <div style="
+              display: flex;
+              justify-content: space-between;
+              overflow-x: auto;
+            ">
+          <table class="holdings-table" style="margin: auto">
+            <tbody id="transaction-results"></tbody>
+          </table>
+        </div>
+      </div>
+      <hr />
+      <div>
+        <div>
+          <h2 style="text-align: center">Dividends History</h2>
+        </div>
+        <div style="
+              display: flex;
+              justify-content: space-between;
+              overflow-x: auto;
+            ">
+          <table class="holdings-table" style="margin: auto">
+            <tbody id="dividend-results"></tbody>
+          </table>
+          <br />
+        </div>
+        <br />
+        <div style="text-align: center">
+          <p>Dividend data updated on 21/Dec/2023</p>
+        </div>
+      </div>
+    </div>
+
+    <hr />
+  </div>
+  <footer></footer>
+  <script src="getFooter.js"></script>
+  <script src="getHoldings.js"></script>
+</body>
+
 </html>
