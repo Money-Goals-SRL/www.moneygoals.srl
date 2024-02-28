@@ -189,7 +189,7 @@ let transactions = [
 	new Transaction("2022-06-27", 115.25, "$", 60, "GOOGL", "Buy", 1.0568, 8.51),
 	new Transaction("2022-06-28", 170.0, "$", 20, "META", "Buy", 1.0521, 8.55),
 	new Transaction("2023-02-03", 193.35, "$", 25, "META", "Sell", 1, 8.25),
-	new Transaction("2023-10-20", 24.97, "£", 180, "BATS", "Buy", 1, 25.47),
+	new Transaction("2023-10-18", 24.97, "£", 180, "BATS", "Buy", 1, 25.47),
 	new Transaction("2023-04-27", 28.0, "$", 50, "LZB", "Buy", 1, 1.0),
 	new Transaction("2023-04-04", 7.5, "$", 200, "MBC", "Buy", 1, 1.0),
 	new Transaction("2023-10-13", 95, "$", 26, "ATVI", "Sell", 1, 0),
@@ -197,6 +197,11 @@ let transactions = [
 	new Transaction("2023-08-18", 1208, "$", 1, "GOOGL18AUG23115C", "Buy", 1, 1.05),
 	new Transaction("2023-05-08", 963, "$", 1, "META18AUG23260C", "Sell", 1, 1.06),
 	new Transaction("2023-08-18", 1828, "$", 1, "META18AUG23260C", "Buy", 1, 1.05),
+	new Transaction("2024-01-29", 401.41, "$", 40, "META", "Sell", 1, 1.14),
+	new Transaction("2024-01-29", 153.52, "$", 125, "GOOGL", "Sell", 1, 2.17),
+	new Transaction("2024-01-29", 14.585, "$", 200, "MBC", "Sell", 1, 1.06),
+	new Transaction("2024-02-27", 137.765, "$", 125, "GOOGL", "Buy", 1, 1.0),
+	new Transaction("2024-02-27", 180.365, "$", 100, "AAPL", "Buy", 1, 1.0),
 ];
 
 dividends.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -216,37 +221,43 @@ let transactionHTMLText = `
 </tr>
 `;
 
-transactions.forEach((tr) => {
-	transactionHTMLText +=
-		`<tr>
+// function to update page content based on button status
+function updatePage(showAll) {
+	var baseYahooURL = "https://finance.yahoo.com/quote/";
+	https: transactions.forEach((tr) => {
+		transactionHTMLText +=
+			`<tr>
     <td className="holding-data">` +
-		tr.date +
-		`</td>
+			tr.date +
+			`</td>
+    <td className="holding-data"><a href=` +
+			baseYahooURL +
+			tr.ticker +
+			`>` +
+			tr.ticker +
+			`</a></td>
     <td className="holding-data">` +
-		tr.ticker +
-		`</td>
+			tr.quantity +
+			`</td>
     <td className="holding-data">` +
-		tr.quantity +
-		`</td>
-    <td className="holding-data">` +
-		tr.price.toFixed(2) +
-		` ` +
-		tr.currency +
-		`
+			tr.price.toFixed(2) +
+			` ` +
+			tr.currency +
+			`
     </td>
     <td className="holding-data">` +
-		tr.type +
-		`</td>
+			tr.type +
+			`</td>
     <td className="holding-data">` +
-		(tr.commission * tr.forexRate).toFixed(2) +
-		` ` +
-		tr.currency +
-		`
+			(tr.commission * tr.forexRate).toFixed(2) +
+			` ` +
+			tr.currency +
+			`
     </td>
   </tr>`;
-});
+	});
 
-let dividendHTMLText = `
+	let dividendHTMLText = `
 <tr>
 <th className="holding-data">Date</th>
 <th className="holding-data">Ticker</th>
@@ -257,40 +268,46 @@ let dividendHTMLText = `
 </tr>
 `;
 
-dividends.forEach((div) => {
-	dividendHTMLText +=
-		`<tr>
+	dividends.forEach((div) => {
+		dividendHTMLText +=
+			`<tr>
     <td className="holding-data">` +
-		div.date +
-		`</td>
+			div.date +
+			`</td>
     <td className="holding-data">` +
-		div.ticker +
-		`</td>
+			`<a href="` +
+			baseYahooURL +
+			div.ticker +
+			`">` +
+			div.ticker +
+			`</a></td>
     <td className="holding-data">` +
-		div.quantity +
-		`</td>
+			div.quantity +
+			`</td>
     <td className="holding-data">` +
-		div.dps.toFixed(4) +
-		` ` +
-		div.currency +
-		`
+			div.dps.toFixed(4) +
+			` ` +
+			div.currency +
+			`
     </td>    
     <td className="holding-data">` +
-		div.tax.toFixed(2) +
-		` ` +
-		div.currency +
-		`
+			div.tax.toFixed(2) +
+			` ` +
+			div.currency +
+			`
     </td>    
     <td className="holding-data">` +
-		div.netAmount.toFixed(2) +
-		` ` +
-		div.currency +
-		`
+			div.netAmount.toFixed(2) +
+			` ` +
+			div.currency +
+			`
     </td>
     </tr>`;
-});
 
-let portfolioHTMLText = `
+		console.log(div.ticker);
+	});
+
+	let portfolioHTMLText = `
     <tr>
         <th>Ticker</th>
         <th class="ticker-data">Shares Quantity</th>
@@ -301,52 +318,86 @@ let portfolioHTMLText = `
     </tr>
 `;
 
-portfolio.forEach((pos) => {
-	portfolioHTMLText +=
-		`
-    <tr>
-    <td class="ticker-data">` +
-		pos.ticker +
-		`</td>
-        <td>` +
-		pos.shares +
-		`</td>   
-    <td>` +
-		pos.totalPurchaseCost.toFixed(2) +
-		` ` +
-		pos.currency +
-		`</td>
-    <td>` +
-		pos.totalSellingRevenue.toFixed(2) +
-		` ` +
-		pos.currency +
-		`</td>
-    <td>` +
-		pos.totalCommissions.toFixed(2) +
-		` ` +
-		pos.currency +
-		`</td>    
-    <td>` +
-		pos.totalNetDividends.toFixed(2) +
-		` ` +
-		pos.currency +
-		`</td>
-    </tr>
-    `;
-	console.log(pos.totalNetDividends);
+	portfolio.forEach((pos) => {
+		if (showAll || pos.shares != 0) {
+			portfolioHTMLText +=
+				`
+        <tr>
+            <td class="ticker-data"><a href=` +
+				baseYahooURL +
+				pos.ticker +
+				`>` +
+				pos.ticker +
+				`</a></td>
+            <td>` +
+				pos.shares +
+				`</td>   
+            <td>` +
+				pos.totalPurchaseCost.toFixed(2) +
+				` ` +
+				pos.currency +
+				`</td>
+            <td>` +
+				pos.totalSellingRevenue.toFixed(2) +
+				` ` +
+				pos.currency +
+				`</td>
+            <td>` +
+				pos.totalCommissions.toFixed(2) +
+				` ` +
+				pos.currency +
+				`</td>    
+            <td>` +
+				pos.totalNetDividends.toFixed(2) +
+				` ` +
+				pos.currency +
+				`</td>
+        </tr>
+        `;
+		}
+
+		// console.log(pos.totalNetDividends);
+	});
+
+	let transactionTable = document.getElementById("transaction-results");
+
+	if (transactionTable) {
+		transactionTable.innerHTML = "";
+		transactionTable.innerHTML += transactionHTMLText;
+	}
+
+	let portfolioTable = document.getElementById("portfolio-results");
+	if (portfolioTable) {
+		portfolioTable.innerHTML = "";
+		portfolioTable.innerHTML += portfolioHTMLText;
+	}
+
+	let dividendTable = document.getElementById("dividend-results");
+	if (dividendTable) {
+		dividendTable.innerHTML = "";
+		dividendTable.innerHTML += dividendHTMLText;
+	}
+}
+
+function updateButtonText() {
+	toggleHoldingsButton.textContent = showAll ? "Current Holdings" : "Historic Holdings";
+}
+
+// page logic activation
+var showAll = false;
+const toggleHoldingsButton = document.getElementById("toggleHoldingsButton");
+
+document.addEventListener("DOMContentLoaded", function () {
+	updatePage(showAll);
+	updateButtonText();
 });
 
-let transactionTable = document.getElementById("transaction-results");
-if (transactionTable) {
-	transactionTable.innerHTML += transactionHTMLText;
-}
+toggleHoldingsButton.addEventListener("click", function () {
+	showAll = !showAll;
+	updatePage(showAll);
+	updateButtonText();
+});
 
-let portfolioTable = document.getElementById("portfolio-results");
-if (portfolioTable) {
-	portfolioTable.innerHTML += portfolioHTMLText;
-}
-
-let dividendTable = document.getElementById("dividend-results");
-if (dividendTable) {
-	dividendTable.innerHTML += dividendHTMLText;
+function updateButtonText() {
+	toggleHoldingsButton.textContent = showAll ? "Current Holdings" : "Historic Holdings";
 }
