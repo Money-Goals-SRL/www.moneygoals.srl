@@ -177,6 +177,7 @@ let dividends = [
 	new Dividend("2023-06-15", 0.1815, "$", 50, "LZB", 0.15, 0),
 	new Dividend("2023-08-17", 0.99, "$", 26, "ATVI", 0.15, 0),
 	new Dividend("2023-12-18", 0.2, "$", 50, "LZB", 0.15, 0),
+	new Dividend("2024-02-01", 0.5772, "£", 180, "BATS", 0, 0),
 ];
 
 let transactions = [
@@ -210,21 +211,22 @@ transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 let portfolio = createPortfolio(transactions, dividends);
 portfolio.sort((a, b) => a.ticker.localeCompare(b.ticker));
 
-let transactionHTMLText = `
-<tr>
-<th className="holding-data">Date</th>
-<th className="holding-data">Ticker</th>
-<th className="holding-data">Quantity</th>
-<th className="holding-data">Avg. Price</th>
-<th className="holding-data">Operation</th>
-<th className="holding-data">Commission</th>
-</tr>
-`;
-
 // function to update page content based on button status
 function updatePage(showAll) {
 	var baseYahooURL = "https://finance.yahoo.com/quote/";
-	https: transactions.forEach((tr) => {
+
+	let transactionHTMLText = `
+    <tr>
+    <th className="holding-data">Date</th>
+    <th className="holding-data">Ticker</th>
+    <th className="holding-data">Quantity</th>
+    <th className="holding-data">Avg. Price</th>
+    <th className="holding-data">Operation</th>
+    <th className="holding-data">Commission</th>
+    </tr>
+    `;
+
+	transactions.forEach((tr) => {
 		transactionHTMLText +=
 			`<tr>
     <td className="holding-data">` +
@@ -233,7 +235,7 @@ function updatePage(showAll) {
     <td className="holding-data"><a href=` +
 			baseYahooURL +
 			tr.ticker +
-			`>` +
+			` target=_blank>` +
 			tr.ticker +
 			`</a></td>
     <td className="holding-data">` +
@@ -278,7 +280,7 @@ function updatePage(showAll) {
 			`<a href="` +
 			baseYahooURL +
 			div.ticker +
-			`">` +
+			`" target=_blank>` +
 			div.ticker +
 			`</a></td>
     <td className="holding-data">` +
@@ -304,7 +306,7 @@ function updatePage(showAll) {
     </td>
     </tr>`;
 
-		console.log(div.ticker);
+		// console.log(div.ticker);
 	});
 
 	let portfolioHTMLText = `
@@ -326,7 +328,7 @@ function updatePage(showAll) {
             <td class="ticker-data"><a href=` +
 				baseYahooURL +
 				pos.ticker +
-				`>` +
+				` target=_blank>` +
 				pos.ticker +
 				`</a></td>
             <td>` +
@@ -386,18 +388,22 @@ function updateButtonText() {
 // page logic activation
 var showAll = false;
 const toggleHoldingsButton = document.getElementById("toggleHoldingsButton");
+const holdingsTitle = document.getElementById("holdings-title");
 
 document.addEventListener("DOMContentLoaded", function () {
 	updatePage(showAll);
-	updateButtonText();
+	updateText();
 });
 
 toggleHoldingsButton.addEventListener("click", function () {
 	showAll = !showAll;
 	updatePage(showAll);
-	updateButtonText();
+	updateText();
 });
 
-function updateButtonText() {
-	toggleHoldingsButton.textContent = showAll ? "Current Holdings" : "Historic Holdings";
+function updateText() {
+	toggleHoldingsButton.textContent = showAll
+		? "Show Current Holdings"
+		: "Show Historical Holdings";
+	holdingsTitle.textContent = showAll ? "Historical Holdings" : "Current Holdings";
 }
